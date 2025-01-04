@@ -1,0 +1,143 @@
+---
+title: "R_titanic_data"
+author: "titanic_data"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+### set the working directory:
+
+#setwd("C:/Users/HOME_PC/Desktop/Business_analyst/R project")
+
+```
+
+```{r}
+### load the required packages for the analysis
+library(tidyverse)
+library(readxl)
+```
+
+```{r}
+### import the data set int the R environment
+titanic_data <- read.csv("titanic.csv")
+```
+
+
+```{r}
+### inspect the titanic data set
+str(titanic_data) 
+```
+
+```{r}
+### the head function display the first few rows of the data set
+head(titanic_data)  
+
+summary(titanic_data)
+```
+
+```{r}
+### displays the number of rows in the data sets
+nrow(titanic_data)
+
+### ncol display the number of columns in the data set
+ncol(titanic_data)
+
+### checking the total number of missing values in each column
+
+colSums(is.na(titanic_data))
+```
+The Titanic data set is a well known data set that provides information about the passengers aboard the RMS Titanic, which sank after hitting an iceberg. It Has commonly been used for data analysis and machine learning projects, Data Exploration analysis and data visualization.
+
+Through the inspection of the data-set, The data-set has 891 observations and 12 variables which were of different datatypes as shown in the table of data dictionary below.
+
+The data-set contained 177 missing values under the Age columns
+
+
+
+
+```{r}
+### Data cleaning and Transformation
+
+### Transform the variable into the correct datatype
+
+titanic_data[, c("Survived", "Pclass")] <- lapply(titanic_data[,c("Survived", "Pclass")],
+                                                  as.factor)
+
+
+### Replacing the missing values in the age columns with the median
+### of the column
+titanic_data$Age[is.na(titanic_data$Age)] <- median(titanic_data$Age,na.rm = TRUE)
+
+Contingency_table_of_gender_vs_survival <- table(titanic_data$Survived,titanic_data$Sex)
+
+prop.table(Contingency_table_of_gender_vs_survival, margin = 2)
+
+```
+During data cleaning and transformation, The Survived variable and Pclass variable which are imported into R environment as integers are converted to Factors datatype of two levels that is (0= Not survived, 1= survived) and three levels that is first, second and third classes respectively.
+In Dealing with the missing values, I replace the missing values in the age column with the median value of the column, I arrived at this conclusion after considering other options such as removing or dropping the missing values which may have lead to loosing some information and cause biasness in our outcome. I considered median value over the mean value since median value is not sensitive to outlier unlike mean value which is sensitive to outliers. From the above contingency table 25.79618% of female who were on board perish in the accident and 74.20382% survived, 81.10919% of the male passenger who were on board never survived while 18.89081% of the male passengers survived.
+From the Mosaic plot below among the passengers on board many of the male passengers did not survived, very few female passengers perish while many of them survived the tragedy.
+
+
+```{r}
+
+### Visualize the Number of people who
+
+mosaicplot(Contingency_table_of_gender_vs_survival, main = "Survival by Sex",
+           color=TRUE)
+
+```
+
+```{r}
+### checking out for outliers in the age column
+
+ggplot(titanic_data, aes(x=Age))+
+                   geom_boxplot( fill="blue")
+
+```
+
+```{r}
+
+### Visualization of the distribution of survival status and age
+ggplot(titanic_data, aes(x= Survived))+
+  geom_bar(fill="blue")+
+  ggtitle("Survival Distribution")+
+  labs(X="Survival status (0=No, 1=Yes", Y="Counts")
+
+```
+From the bar chart above the number of people who perished in the titanic tragedy was more than the number of the passengers who were on board.
+```{r}
+
+### Distribution by age
+ggplot(titanic_data, aes(x= Age))+
+  geom_histogram(binwidth = 5, fill="skyblue")+
+  ggtitle("Age Distribution")
+```
+
+```{r}
+
+### Visualization of bivariate variables
+ggplot(titanic_data, aes(x= Pclass, fill= Survived))+
+  geom_bar(position = "fill")+
+  labs(title = "Survival by passenger Class", X= "Class",y="Proportion")+
+  scale_fill_manual(values = c("red","green"), labels=c("No","Yes"))
+```
+The above bar chart The proportion of passengers who survived during the accident in the first class cabin were more than those who did not survive, Many of the passengers who perished in the tragedy were from the third class which had the highest prportion of fatality.
+```{r}
+### Age vs Fare
+
+ggplot(titanic_data, aes(x= log(Age), y= log(Fare)))+
+  geom_point(alpha=0.5)+
+  labs(title = "Age Vs Fare", x="Age", y="Fare")
+```
+
+```{r}
+
+ggplot(titanic_data, aes(x= Pclass, fill= Sex))+
+  geom_bar(position = "dodge")+
+  facet_wrap(~Survived)+
+  labs(title = "Survival by passenger Class and gender", X= "Class",y="Counts")
+```
+The passenger were travelling in different classes that is first class, second class and Third class. From the graph the number of passengers who were travelling in third class died where most of them were males, The number of Passenger who died travelling in first class cabin were fewer with the female passengers experiencing close to zero deaths. In general in all the three classes cabin the number of males passengers who died were more than that of female passengers. many of the female passengers who were travelling in first class cabin survived the tragedy than the males while the number of females who survived the tragedy in second and third class cabin were equal. In general the number of females who survived were more than that of male passengers with male passengers in second class cabin experiencing a minimum number of survival.
